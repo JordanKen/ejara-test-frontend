@@ -1,0 +1,53 @@
+
+import 'package:get_it/get_it.dart';
+import 'package:hive/hive.dart';
+import 'package:money/core/data/local/db_constants.dart';
+import 'package:money/core/data/network/http/interfaces/auth/authentification_api_service.dart';
+import 'package:money/core/data/network/http/interfaces/money/money_api_service.dart';
+import 'package:money/core/models/user/userModel.dart';
+import 'package:money/core/services/user_service_hive.dart';
+import 'package:path_provider/path_provider.dart' as path_provider;
+
+
+GetIt locator=GetIt.instance; // initialisation get it dependancy
+
+Future<void> setupLocator() async {
+
+  //////////////////////////////////////////////////////////////////////////////
+  ////////////////////
+  /////////////////// INITIALITION SERIVICE
+  //////////////////
+  //////////////////////////////////////////////////////////////////////////////
+
+  locator.registerLazySingleton(() => AuthentificationApiService());
+  locator.registerLazySingleton(() => MoneyApiService());
+  locator.registerLazySingleton(() => UserServiceHive());
+
+  //////////////////////////////////////////////////////////////////////////////
+  ////////////////////
+  /////////////////// INJECTION DES DEPENDANCE DANS APPLICATION
+  //////////////////
+  //////////////////////////////////////////////////////////////////////////////
+
+  locator.registerFactory<UserModel>(() => UserModel());
+
+  //////////////////////////////////////////////////////////////////////////////
+  ////////////////////
+  /////////////////// INITIALITION DATABASE
+  //////////////////
+  //////////////////////////////////////////////////////////////////////////////
+
+  final appDocumentDir = await path_provider.getApplicationDocumentsDirectory();
+
+  Hive.init("${appDocumentDir.path}/${DBConstants.DB_NAME}");
+
+  //////////////////////////////////////////////////////////////////////////////
+  ////////////////////
+  /////////////////// INITIALITION  TABLE HIVE
+  //////////////////
+  //////////////////////////////////////////////////////////////////////////////
+
+  Hive.registerAdapter(UserModelAdapter());
+
+}
+
